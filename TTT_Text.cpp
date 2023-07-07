@@ -1,11 +1,15 @@
 #include <stdlib.h>
+#include <ios>
 #include <iostream>
+#include <limits>
+#include <string>
 using namespace std;
 
 // array for the board
 char board[3][3] = {{'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'}};
 char player = 'X';
 char location;
+char gameState = 'W';
 
 void renderBoard() {
   cout << "\n";
@@ -39,7 +43,16 @@ bool gameOver() {  // check all combinations of gamestate --- true means game ov
     return true;
   }
 
-  return false;
+  // check if spaces remain, if no space is found, game is tied and over.
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (isdigit(board[i][j])) {
+        return false;
+      }
+    }
+  }
+  gameState = 'T';
+  return true;
 }
 
 void playerTurn() {
@@ -53,7 +66,8 @@ void playerTurn() {
     }
 
     cin >> location;
-    if (location >= '1' && location <= '9') {  // get user input
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    if (cin.gcount() < 2 && location >= '1' && location <= '9') {  // get user input
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
           if (board[i][j] == location) {
@@ -63,6 +77,11 @@ void playerTurn() {
           }
         }
       }
+      if (!validInput) {
+        cout << "This location is already taken. Please try again\n";
+      }
+    } else {
+      cout << "Invalid input. Please try again.\n";
     }
   }
 }
@@ -72,5 +91,16 @@ int main() {
   while (!gameOver()) {
     playerTurn();
     renderBoard();
+  }
+
+  cout << "\t\t\t    GAME OVER\n";
+  if (gameState == 'W') {
+    if (player == 'O') {  // if it was O's turn and the game ended, that means X won (and vice versa)
+      cout << "\t\t\t  PLAYER 1 WINS";
+    } else {
+      cout << "\t\t\t  PLAYER 2 WINS";
+    }
+  } else {
+    cout << "\t\t\t    GAME TIED\n";
   }
 }
